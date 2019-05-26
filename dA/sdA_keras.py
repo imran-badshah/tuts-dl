@@ -6,17 +6,52 @@ from tensorflow.keras.datasets import mnist
 import numpy as np
 import matplotlib.pyplot as plt
 
-(x_train, _), (x_test, _) = mnist.load_data()
-x_train = utils.normalize(x_train, axis=1)
-x_test = utils.normalize(x_test, axis=1)
+def prepareForModel(input):
+    "Normalizes and Flattens `input` retaining number of inputs"
 
-x_train = x_train.reshape((len(x_train), np.prod(x_train.shape[1:])))
-x_test = x_test.reshape((len(x_test), np.prod(x_test.shape[1:])))
+    input = utils.normalize(input, axis=1)
+    input = input.reshape((len(input), np.prod(input.shape[1:])))
+    return input
+
+
+def visualise_subplot(n_rows, n_cols, input_images, output_images, input_shape, output_shape, figsize=(20, 4)):
+    """Visualise given images
+    
+    Arguments:
+        n_rows: Number of rows in subplot 
+        n_cols: Number of columns (images) in subplot
+        input_images: input image to compare. Can have N images
+        output_images: output image to access. Can have N images
+        input_shape: original size of input image
+        output_shape:  original size of output image
+        figsize: tuple for scale of images
+    """
+    n_display = n_cols
+    plt.figure(figsize=figsize)
+    for i in range(n_display):
+        # Display original
+        ax = plt.subplot(n_rows, n_display, i + 1)
+        plt.imshow(input_images[i].reshape(input_shape))
+        plt.gray()
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+
+        # Display reconstructed
+        ax = plt.subplot(n_rows, n_display, i + 1 + n_display)
+        plt.imshow(output_images[i].reshape(output_shape))
+        plt.gray()
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+    plt.show()
+
+(x_train, _), (x_test, _) = mnist.load_data()
+x_train = prepareForModel(x_train)
+x_test = prepareForModel(x_test)
 
 print(x_train.shape, x_test.shape)
 
 encoding_dim = 32
-flattend_input_dim = 784
+flattend_input_dim = np.prod(x_train.shape[1:])
 
 input_img = layers.Input(shape=(flattend_input_dim, ))
 encoded = layers.Dense(encoding_dim, activation='relu')(input_img)
@@ -44,20 +79,8 @@ autoencoder.fit(
 # Visualise
 encoded_imgs = encoder.predict(x_test)
 decoded_imgs = decoder.predict(encoded_imgs)
-n_display = 10
-plt.figure(figsize=(20, 4))
-for i in range(n_display):
-    # Display original
-    ax = plt.subplot(2, n_display, i + 1)
-    plt.imshow(x_test[i].reshape(28, 28))
-    plt.gray()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
+visualise_subplot(
+    n_rows=2, n_cols=10,
+    input_images=x_test, output_images=decoded_imgs,
+    input_shape=(28, 28), output_shape=(28,28))
 
-    # Display reconstructed
-    ax = plt.subplot(2, n_display, i + 1 + n_display)
-    plt.imshow(decoded_imgs[i].reshape(28, 28))
-    plt.gray()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
-plt.show()
