@@ -2,6 +2,7 @@ from tensorflow.keras.layers import Input, Dense, Conv2D, MaxPooling2D, UpSampli
 from tensorflow.keras.models import Model
 from tensorflow.keras import backend as K
 from tensorflow.keras import utils
+from tensorflow.keras.callbacks import TensorBoard
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -102,10 +103,13 @@ def main():
 
     print(autoencoder.summary())
 
+    # Tensor Board
+    # `tensorboard --logdir=/tmp/sdA_conv`
     autoencoder.fit(
         x_train, x_train,
         epochs=50, batch_size=128,
         shuffle=True,
+        callbacks=[TensorBoard(log_dir='/tmp/sdA_conv')],
     )
 
     # Visualise
