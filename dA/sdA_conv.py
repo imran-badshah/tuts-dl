@@ -51,20 +51,21 @@ def visualise_subplot(n_rows, n_cols, input_images, output_images, input_shape, 
     plt.show()
 
 
-def visualise_encoded_subplot(n_cols, input_images, figsize=(20, 4)):
+def visualise_encoded_subplot(input_images, n_cols, figsize=(20, 4)):
     """Visualise given encoded layer
     
     Arguments:
-        n_cols: Number of columns (images) in subplot
         input_images: encoded image. Can have N images
-        # input_shape: original size of input image
+        n_cols: Number of columns (images from dataset `input_images` to display) in subplot
         figsize: tuple for scale of images
     """
     n_rows = 1
+    image_cols = input_images.shape[1]
+    image_rows = input_images.shape[2] * input_images.shape[3]
     plt.figure(figsize=figsize)
     for i in range(n_cols):
-        ax = plt.subplot(n_rows, n_cols, i)
-        plt.imshow(input_images[i].reshape(4, 4 * 8).T) # TO-DO: Determine `input_shape`
+        ax = plt.subplot(n_rows, n_cols, i + 1)
+        plt.imshow(input_images[i].reshape(image_cols, image_rows).T) # TO-DO: Determine `input_shape`
         plt.gray()
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
@@ -118,6 +119,12 @@ def main():
         n_rows=2, n_cols=10,
         input_images=x_test, output_images=decoded_imgs,
         input_shape=(28, 28), output_shape=(28, 28)
+    )
+    encoder = Model(input_img, encoded)
+    encoded_imgs = encoder.predict(x_test)
+    visualise_encoded_subplot(
+        input_images=encoded_imgs,
+        n_cols=10
     )
 
 
